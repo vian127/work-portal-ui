@@ -6,28 +6,44 @@
 <template>
 	<div class="execution">
 		<basic-container>
-			<avue-crud 
-				ref="crud"
-				v-model="form"
-                :option="tableOption"
-				:data="tableData"
-                :permission="permissionList"
-				:page="page"
-                :table-loading="tableLoading"
-                @on-load="getPage"
-				@search-change="searchChange"
-                @sort-change="sortChange"
-                @refresh-change="refreshChange"
-                @row-save="handleSave"
-                @row-update="handleUpdate"
-                @row-del="handleDel"
-			>
-            </avue-crud>
+            <div>
+                <avue-form ref="searchForm" :option="searchOption" v-model="searchData">
+                    <template slot="menuForm">
+                        <el-button type="primary" @click="handleSearch">搜索</el-button>
+                        <el-button @click="handleEmpty">清 空</el-button>
+                    </template>
+                </avue-form>
+            </div>
+            <el-row :gutter="10">
+                <el-col :span="8">
+                    <el-card class="box-card">
+                        <div slot="header" class="clearfix">
+                            <h3><i class="el-icon-document-copy"></i> 组织结构</h3>
+                        </div>
+                        <avue-tree :loading="treeLoading" :option="treeOption" :data="treeData" @node-click="nodeClick" v-model="treeForm">
+                            <span class="el-tree-node__label" slot-scope="{ node, data }">
+                                <span>
+                                <!-- <i class="el-icon-user-solid"></i> -->
+                                {{ (node || {}).label }}
+                                </span>
+                            </span>
+                        </avue-tree>
+                    </el-card>
+                </el-col>
+                <el-col :span="16">
+                    <el-card class="box-card">
+                        <avue-form :option="formOption" v-model="formData" @submit="submit"></avue-form>
+                    </el-card>
+                </el-col>
+            </el-row>
         </basic-container>
     </div>
 </template>
 
 <script>
+    /**
+     * 部门信息维护
+     */
     import {mapGetters} from 'vuex'
     import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/deptinfo'
     import {tableOption} from './deptinfo'
@@ -36,24 +52,161 @@
         name: 'deptinfo',
         data() {
             return {
-                form: {},
-                tableData: [],
-                tableOption: tableOption,
-				page: {
-                    total: 0, // 总页数
-                    currentPage: 1, // 当前页数
-                    pageSize: 20, // 每页显示多少条
-                    ascs: [],//升序字段
-                    descs: []//降序字段
+                treeForm:{},
+                searchData: {},
+                treeLoading:true,
+                treeData:[
+                    {
+                        value:0,
+                        label:'一级部门',
+                        children:[
+                            {
+                                value:1,
+                                label:'一级部门1',
+                            },{
+                                value:2,
+                                label:'一级部门2',
+                            }
+                        ]
+                    },{
+                        value:3,
+                        label:'二级部门',
+                        children:[
+                            {
+                                value:4,
+                                label:'二级部门1',
+                            },{
+                                value:5,
+                                label:'二级部门2',
+                            }
+                        ]
+                    }
+                ],
+                treeOption:{
+                    title:'新增组织结构',
+                    filterText:"搜索关键字自定义",
+                    defaultExpandAll:true,
+                    filter: false,
+                    formOption:{
+                        labelWidth:100,
+                        column:[{
+                            label:'自定义项',
+                            prop:'test'
+                        }],
+                    },
+                    props:{
+                        labelText:'标题',
+                        label:'label',
+                        value:'value',
+                        children:'children'
+                    }
                 },
-                paramsSearch: {},
-                tableLoading: false,
+                formData:{
+                    name:'张三',
+                    code: 'code',
+                    alias: '部门简称',
+                    description: '节点描述',
+                    type: '2',
+                    rstate: '1',
+                },
+                formOption: {
+                    labelWidth: 120,
+                    column: [
+                        {
+                            label: '部门节点名称',
+                            prop: 'name',
+                        },{
+                            label: '部门节点代码',
+                            prop: 'code'
+                        },{
+                            label: '部门节点简称',
+                            prop: 'alias'
+                        },{
+                            label: '部门节点类型',
+                            prop: 'type',
+                            type: "select",
+                            dicData: [
+                                {
+                                    label: '执行长部门',
+                                    value: "1"
+                                },{
+                                    label: '事业处/总处/分公司部门',
+                                    value: "2"
+                                },{
+                                    label: '处级部门',
+                                    value: "3"
+                                },{
+                                    label: '部级部门',
+                                    value: "4"
+                                },{
+                                    label: '课级部门',
+                                    value: "5"
+                                }]
+                        }, {
+                            label: '记录状态',
+                            prop: 'rstate',
+                            type: 'select',
+                            dicData: [
+                                {
+                                    label: '已生效',
+                                    value: "1"
+                                },{
+                                    label: '已失效',
+                                    value: "0"
+                                }]
+                        },{
+                            label: '部门节点描述',
+                            prop: 'description',
+                            type: 'textarea',
+                            span: 24,
+                            minRows: 3,
+                            maxlength: 200,
+                        }
+                    ]
+                },
+                searchOption: {
+                    menuSpan:8,
+                    menuPosition: 'right',
+                    emptyBtn:false,
+                    submitBtn:false,
+                    column: [
+                    {
+                        label: '组织名称',
+                        prop: 'zuzhi',
+                        type: 'select',
+                        span: 8,    
+                        dicData: [
+                            {
+                                label: '组织名称',
+                                value: "1",
+                            },{
+                                label: '组织名称2',
+                                value: "0",
+                            }],
+                    },{
+                        label: '版本名称',
+                        prop: 'bamben',
+                        type: 'select',
+                        span: 8,    
+                        dicData: [
+                            {
+                                label: '版本名称1',
+                                value: "1"
+                            },{
+                                label: '版本名称2',
+                                value: "0"
+                            }]
+                    }]
+                }
             }
         },
 		
         created() {
         },
         mounted: function () {
+            setTimeout(()=>{
+                this.treeLoading=false;
+            },2000)
         },
         computed: {
             ...mapGetters(['permissions']),
@@ -67,126 +220,18 @@
             }
         },
         methods: {
-            /**
-             * 获取列表(分页)数据
-             */
-            getPage(page, params) {
-                this.tableLoading = true
-                getPage(Object.assign({
-                    current: page.currentPage,
-                    size: page.pageSize,
-                    descs: this.page.descs,
-                    ascs: this.page.ascs,
-                }, params, this.paramsSearch)).then(response => {
-                    this.tableData = response.data.data.records
-                    this.page.total = response.data.data.total
-                    this.page.currentPage = page.currentPage
-                    this.page.pageSize = page.pageSize
-                    this.tableLoading = false
-                }).catch(() => {
-                    this.tableLoading = false
-                })
+            nodeClick(data){
+                this.$message.success(JSON.stringify(data))
             },
-            /**
-             * 筛选条件变更处理
-             */
-            searchChange(params,done) {
-                params = this.filterForm(params)
-                this.paramsSearch = params
-                this.page.currentPage = 1
-                this.getPage(this.page, params)
-                done()
+            submit() {
+                console.log(this.formData)
             },
-            /**
-             * 排序栏位变更处理
-             */
-            sortChange(val) {
-                let prop = val.prop ? val.prop.replace(/([A-Z])/g, "_$1").toLowerCase() : ''
-                if (val.order == 'ascending') {
-                    this.page.descs = []
-                    this.page.ascs = prop
-                } else if (val.order == 'descending') {
-                    this.page.ascs = []
-                    this.page.descs = prop
-                } else {
-                    this.page.ascs = []
-                    this.page.descs = []
-                }
-                this.getPage(this.page)
+            handleSearch(){
+                console.log(this.searchData)
             },
-            /**
-             * 刷新回调
-             */
-            refreshChange(page) {
-                this.getPage(this.page)
+            handleEmpty(){
+                this.$refs.searchForm.resetForm();
             },
-			
-            /**
-             * @title 数据添加
-             * @param row 为当前的数据
-             * @param done 为表单关闭函数
-             *
-             **/
-            handleSave: function (row, done, loading) {
-                addObj(row).then(response => {
-                    this.$message({
-                        showClose: true,
-                        message: '添加成功',
-                        type: 'success'
-                    })
-                    done()
-                    this.getPage(this.page)
-                }).catch(() => {
-                    loading()
-                })
-            },
-			
-            /**
-             * @title 数据更新
-             * @param row 为当前的数据
-             * @param index 为当前更新数据的行数
-             * @param done 为表单关闭函数
-             *
-             **/
-            handleUpdate: function (row, index, done, loading) {
-                putObj(row).then(response => {
-                    this.$message({
-                        showClose: true,
-                        message: '修改成功',
-                        type: 'success'
-                    })
-                    done()
-                    this.getPage(this.page)
-                }).catch(() => {
-                    loading()
-                })
-            },
-			
-            /**
-             * @title 数据删除
-             * @param row 为当前的数据
-             * @param index 为当前删除数据的行数
-             *
-             **/
-            handleDel: function (row, index) {
-                var _this = this
-                this.$confirm('是否确认删除此数据', '提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning'
-                }).then(function () {
-                    return delObj(row.id)
-                }).then(data => {
-                    _this.$message({
-                        showClose: true,
-                        message: '删除成功',
-                        type: 'success'
-                    })
-                    this.getPage(this.page)
-                }).catch(function (err) {
-                })
-            },
-
         }
     }
 </script>

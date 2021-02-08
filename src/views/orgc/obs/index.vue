@@ -20,19 +20,27 @@
                 @refresh-change="refreshChange"
                 @row-save="handleSave"
                 @row-update="handleUpdate"
-                @row-del="handleDel"
 			>
-                <!-- 公司关系 -->
-                <template slot="companyRelationForm">
-                  <companyRelation></companyRelation>
+             <template slot-scope="scope" slot="menuLeft">
+                <el-button style="float: left;" type="primary" icon="el-icon-plus" size="small" @click.stop="handleAdd(scope.row,scope.index)">新增</el-button>
+            </template>
+                <template slot-scope="scope" slot="menu">
+                    <el-button class="el-icon-view" size="small" type="text" @click="handleDetail(scope.row,scope.index)"> 查看</el-button>
+                    <el-button class="el-icon-edit" size="small" type="text" @click="handleEdit(scope.row,scope.index)"> 编辑</el-button>
+                    <el-button class="el-icon-delete" size="small" type="text" @click="handleDel(scope.row,scope.index)"> 删除</el-button>
                 </template>
                 <!-- 干系人 -->
-                <template slot="takeholderForm">
-                  <companystakeholder></companystakeholder>
+                <template slot="takeholderForm" v-if="isShow">
+                  <stakeholder :isShowView="isShowView" :stakeholderData="stakeholderData" :companyId="companyId" @getStakeholder="getStakeholder"></stakeholder>
                 </template>
                 <!-- 服务驻点 -->
-                <template slot="stationForm">
-                  <station></station>
+                <template slot="stationForm" v-if="isShow">
+                  <station :isShowView="isShowView" :companyId="companyId" @getStation="getStation"></station>
+                </template>
+                <!-- 公司关系 -->
+                <!-- 暂时先隐藏 -->
+                <template slot="companyRelationForm" v-if="false">
+                  <companyRelation @getCompanyRelation="getCompanyRelation"></companyRelation>
                 </template>
             </avue-crud>
               
@@ -41,22 +49,26 @@
 </template>
 
 <script>
+/**
+ * 公司代码维护
+ */
     import {mapGetters} from 'vuex'
     import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/companyinfo'
     import {tableOption} from './companyinfo'
-    import companystakeholder from '../../orgc/companystakeholder/index'
+    import stakeholder from '../../../components/orgc/stakeholder/stakeholeder'
     import station from '../../../components/orgc/station/station'
     import companyRelation from '../../../components/orgc/company-relation/company-relation'
     export default {
         name: 'companyinfo',
         components: {
-            companystakeholder,
+            stakeholder,
             station,
             companyRelation
         },
         data() {
             return {
                 form: {},
+                companyId: null,
                 tableData: [],
                 tableOption: tableOption,
 				page: {
@@ -68,19 +80,12 @@
                 },
                 paramsSearch: {},
                 tableLoading: false,
-                infoOption:{
-                    column: [{
-                        label: '年龄',
-                        prop: 'sex',
-                    }]
-                },
-                infoData:[
-                    {
-                    sex:15,
-                    }, {
-                    sex:16,
-                    }
-                ]
+                companyRelation:[], // 公司关系
+                station:[], // 服务驻点
+                stakeholders:[], // 干系人
+                stakeholderData: [], // 回显干系人
+                isShow: false,
+                isShowView: false,
             }
         },
 		
@@ -120,6 +125,57 @@
                     this.tableLoading = false
                 })
             },
+            /**
+             * 新增
+             */
+            handleAdd(row,index){
+                this.isShow = false;
+                this.handleIsShow(this.isShow)
+                this.$refs.crud.rowAdd(row,index);
+            },
+            /**
+             * 获取详情
+             */
+            handleDetail(row,index){
+                this.showDetail(row, index,'view');
+            },
+             /**
+             * 编辑
+             */
+            handleEdit(row,index){
+                this.companyId = row.id;
+                this.showDetail(row, index, 'edit');
+            },
+            /**
+             * 返显数据
+             */
+            showDetail(row,index,type){
+                let that = this;
+                this.isShow = true;
+                this.handleIsShow(this.isShow);
+                 getObj(row.id).then(function(res){
+                    if(type === 'view'){
+                        that.isShowView = true;
+                        that.$refs.crud.rowView(row,index);
+                    } else if(type == 'edit'){
+                        that.isShowView = false;
+                        that.$refs.crud.rowEdit(row,index);
+                    }
+                    // 干系人
+                   that.stakeholderData = res.data.data.companyStakeholders;
+                })
+            },
+            /**
+             * 控制干系人和服务驻点显示和隐藏
+             */
+            handleIsShow(type){
+                this.tableOption.group.forEach(item=>{
+                    if(item.prop=="group2" || item.prop=="group3"){
+                        item.display = type;
+                    }
+                })
+            },
+
             /**
              * 筛选条件变更处理
              */
@@ -161,7 +217,13 @@
              *
              **/
             handleSave: function (row, done, loading) {
-                addObj(row).then(response => {
+                let data = {
+                    companyInfo: row,
+                    relation: this.companyRelation,
+                    companyStakeholders: this.stakeholders,
+                    serviceStations: this.station,
+                }
+                addObj(data).then(response => {
                     this.$message({
                         showClose: true,
                         message: '添加成功',
@@ -182,7 +244,13 @@
              *
              **/
             handleUpdate: function (row, index, done, loading) {
-                putObj(row).then(response => {
+                 let data = {
+                    companyInfo: row,
+                    relation: this.companyRelation,
+                    companyStakeholders: this.stakeholders,
+                    serviceStations: this.station,
+                }
+                putObj(data).then(response => {
                     this.$message({
                         showClose: true,
                         message: '修改成功',
@@ -219,7 +287,24 @@
                 }).catch(function (err) {
                 })
             },
-
+            /**
+             * 获取服务驻点数据
+             */
+            getStation(data){
+                this.station = data;
+            },
+            /**
+             * 获取公司关系数据
+             */
+            getCompanyRelation(data){
+                this.companyRelation = data;
+            },
+            /**
+             * 干系人
+             */
+            getStakeholder(data){
+                this.stakeholders = data;
+            },
         }
     }
 </script>

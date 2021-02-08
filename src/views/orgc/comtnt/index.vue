@@ -22,8 +22,21 @@
                 @row-update="handleUpdate"
                 @row-del="handleDel"
 			>
+            <template slot-scope="scope" slot="menu">
+                <el-button size="small"  type="text" @click="handleRelevance(scope.row)"> 关联公司</el-button>
+            </template>
             </avue-crud>
         </basic-container>
+        <el-dialog title="关联公司"
+               :visible.sync="dialogVisible"
+               width="80%"
+            >
+            <relevanceCompany ref="relevanceCompany"></relevanceCompany>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+                <el-button size="small" type="primary" @click="selectCompany()">确 定</el-button>
+            </span>
+        </el-dialog>   
     </div>
 </template>
 
@@ -31,13 +44,24 @@
     import {mapGetters} from 'vuex'
     import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/companttenant'
     import {tableOption} from './companttenant'
-
+    import relevanceCompany from '../../../components/orgc/relevance-company/relevance-company'
     export default {
         name: 'companttenant',
+        components:{
+            relevanceCompany,
+        },
         data() {
             return {
                 form: {},
-                tableData: [],
+                tableData: [
+                    {
+                        id: 1,
+                        companyId: 2,
+                        seq: 2,
+                        rstate: '已生效'
+
+                    }
+                ],
                 tableOption: tableOption,
 				page: {
                     total: 0, // 总页数
@@ -48,6 +72,7 @@
                 },
                 paramsSearch: {},
                 tableLoading: false,
+                dialogVisible: false
             }
         },
 		
@@ -186,7 +211,18 @@
                 }).catch(function (err) {
                 })
             },
-
+            handleRelevance(row){
+                console.log(row);
+                this.dialogVisible = true;
+            },
+            /**
+             * 选择关联告警
+             */
+            selectCompany(){
+                this.dialogVisible = false;
+                let data = this.$refs.relevanceCompany.selectData;
+                this.$message.success('选中的数据'+ JSON.stringify(data));
+            }
         }
     }
 </script>

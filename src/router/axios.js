@@ -26,6 +26,8 @@ axios.defaults.withCredentials = true
 NProgress.configure({
   showSpinner: false
 })
+axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
+
 
 // HTTPrequest拦截
 axios.interceptors.request.use(config => {
@@ -55,6 +57,7 @@ axios.interceptors.request.use(config => {
   if (token && !isToken) {
     config.headers['Authorization'] = 'Bearer ' + token// token
   }
+  // config.headers['Content-Type'] ="application/json;charset=UTF-8";
   return config
 }, error => {
   return Promise.reject(error)

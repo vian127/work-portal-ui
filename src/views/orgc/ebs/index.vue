@@ -38,16 +38,13 @@
                 </el-col>
                 <el-col :span="8" v-if="isShowOrg">
                     <el-card class="box-card">
-                         <div slot="header" class="clearfix">
+                        <div slot="header" class="clearfix">
                             <h3><i class="el-icon-document-copy"></i> 组织结构</h3>
-                            
                                 <el-button class="close-tree-box" type="text" @click="handleTree()">
                                     <el-tooltip content="关闭" placement="top">
-                                    <i class="el-icon-close"></i>
-                                     </el-tooltip>
+                                        <i class="el-icon-close"></i>
+                                    </el-tooltip>
                                 </el-button>
-                           
-                            
                         </div>
                         <avue-tree :loading="treeLoading" :option="treeOption" :data="treeData" @update="update" @save="save" @del="del" v-model="treeForm">
                             <span class="el-tree-node__label" slot-scope="{ node, data }">
@@ -65,8 +62,11 @@
 </template>
 
 <script>
+    /**
+     * 组织机构维护
+     */
     import {mapGetters} from 'vuex'
-    import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/orginfo'
+    import {getPage, getObj, addObj, putObj, delObj, getTree, addTree,editTree,deleteTree} from '@/api/orgc/orginfo'
     import {tableOption} from './orginfo'
 
     export default {
@@ -77,10 +77,9 @@
                 form: {},
                 tableData: [
                     {
-                        id: 1,
-                        name: '组织机构',
-                        code: 'qoq',
-                        alias: '组织机构'
+                        id:1,
+                        orgName: 'ww',
+                        orgCode: 'qq'
                     }
                 ],
                 tableOption: tableOption,
@@ -103,21 +102,6 @@
                             {
                                 value:1,
                                 label:'一级部门1',
-                            },{
-                                value:2,
-                                label:'一级部门2',
-                            }
-                        ]
-                    },{
-                        value:3,
-                        label:'二级部门',
-                        children:[
-                            {
-                                value:4,
-                                label:'二级部门1',
-                            },{
-                                value:5,
-                                label:'二级部门2',
                             }
                         ]
                     }
@@ -128,13 +112,13 @@
                     defaultExpandAll:true,
                     formOption:{
                         labelWidth:100,
-                        column:[{
-                            label:'自定义项',
-                            prop:'test'
-                        }],
+                        // column:[{
+                        //     label:'自定义项',
+                        //     prop:'test'
+                        // }],
                     },
                     props:{
-                        labelText:'标题',
+                        labelText:'节点名称',
                         label:'label',
                         value:'value',
                         children:'children'
@@ -223,6 +207,9 @@
              *
              **/
             handleSave: function (row, done, loading) {
+                // row.id = new Date().getTime();
+                // row.orgId = new Date().getTime();
+                // row.verSionId = new Date().getTime() + 1;
                 addObj(row).then(response => {
                     this.$message({
                         showClose: true,
@@ -287,22 +274,32 @@
             handleTree: function (row) {
                 if(row){
                     this.isShowOrg = row
-                    // this.page2.currentPage = 1
-                    // this.getPage2(this.page2)
+                    let data = {
+                        id: row.verSionId,
+                    }
+                    this.getTree(data);
                 }else{
                     this.isShowOrg = null
                 }
+            },
+            getTree(data){
+                getTree(data).then(res =>{
+                    this.treeData = res.data.data;
+                })
             },
             tip(node,data){
                 this.$message.success(JSON.stringify(data))
             },
             del(data,done){
+                console.log(data)
                 this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    this.$message.success('删除回调')
+                    deleteTree(data.id).then(res =>{
+                        this.$message.success('删除回调')
+                    })
                     done();
                 }).catch(() => {
                     this.$message({
@@ -315,8 +312,18 @@
                 this.$message.success('更新回调')
                 done();
             },
-            save(data,parent,done,loading){
-                this.$message.success('新增回调')
+            save(parent,data,done,loading){
+                console.log(parent,data)
+                let paramsData = {
+                    pid: '',
+                    nodeId: '',
+                    nodeName: data.label,
+                    nodeInfo: '',
+                    children: [],
+                }
+                addTree(paramsData).then(res =>{
+                    // this.$message.success('新增成功')
+                })
                 this.treeForm.id = new Date().getTime();
                 this.treeForm.value=new Date().getTime();
                 this.treeForm.children=[];

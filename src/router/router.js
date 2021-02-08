@@ -12,6 +12,11 @@ import PageRouter from './page/'
 import ViewsRouter from './views/'
 import AvueRouter from './avue-router'
 import Store from '../store/'
+/**vue-router版本过高，导致同一路由点击两次控制台报错 */
+const routerPush = VueRouter.prototype.push
+VueRouter.prototype.push = function push(location) {
+  return routerPush.call(this, location).catch(error => error)
+}
 Vue.use(VueRouter)
 let Router = new VueRouter({
   scrollBehavior (to, from, savedPosition) {

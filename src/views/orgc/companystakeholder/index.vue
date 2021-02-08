@@ -38,7 +38,7 @@
             return {
                 form: {},
                 tableData: [],
-                tableOption: tableOption.initTableOption(false),
+                tableOption: tableOption,
 				page: {
                     total: 0, // 总页数
                     currentPage: 1, // 当前页数

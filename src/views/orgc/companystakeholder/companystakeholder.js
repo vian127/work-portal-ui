@@ -4,19 +4,6 @@
  * date 2021-01-28 14:41:17
  */
 export const tableOption = {
-    /**控制表格配置 */
-    initTableOption: (type) => {
-        tableOption.tableConfig.printBtn = type;
-        tableOption.tableConfig.menu = type;
-        tableOption.tableConfig.excelBtn = type;
-        tableOption.tableConfig.header = type;
-        tableOption.tableConfig.column.forEach(item => {
-            item.addDisplay = type;
-            item.editDisplay =  type;
-            item.viewDisplay = type;
-        });
-        return tableOption.tableConfig;
-    },
     tableConfig: {
         dialogDrag: true,
         border: true,

@@ -22,8 +22,21 @@
                 @row-update="handleUpdate"
                 @row-del="handleDel"
 			>
+                <template slot-scope="scope" slot="menu">
+                    <el-button size="small"  type="text" @click="handleOrg(scope.row)"> 关联组织</el-button>
+                </template>
             </avue-crud>
         </basic-container>
+        <el-dialog title="关联组织"
+               :visible.sync="dialogVisible"
+               width="80%"
+            >
+            <relevanceOrg ref="relevanceOrg"></relevanceOrg>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+                <el-button size="small" type="primary" @click="handleSelect()">确 定</el-button>
+            </span>
+        </el-dialog>   
     </div>
 </template>
 
@@ -31,13 +44,20 @@
     import {mapGetters} from 'vuex'
     import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/orgtenant'
     import {tableOption} from './orgtenant'
-
+    import relevanceOrg from '../../../components/orgc/relevance-org/relevance-org'
     export default {
         name: 'orgtenant',
+        components:{
+            relevanceOrg,
+        },
         data() {
             return {
                 form: {},
-                tableData: [],
+                tableData: [
+                    {
+                        orgId: '23'
+                    }
+                ],
                 tableOption: tableOption,
 				page: {
                     total: 0, // 总页数
@@ -48,6 +68,7 @@
                 },
                 paramsSearch: {},
                 tableLoading: false,
+                dialogVisible: false,
             }
         },
 		
@@ -186,8 +207,18 @@
                 }).catch(function (err) {
                 })
             },
+            handleOrg(row){
+                console.log(row)
+                this.dialogVisible = true;
+            },
+            handleSelect(){
+                this.dialogVisible = false;
+                let data = this.$refs.relevanceOrg.selectData;
+                console.log(data);
+                this.$message.success('选中的数据'+ JSON.stringify(data));
+            }
 
-        }
+        },
     }
 </script>
 

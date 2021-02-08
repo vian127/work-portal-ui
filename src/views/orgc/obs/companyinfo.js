@@ -14,7 +14,9 @@ export const tableOption = {
     searchShow: false,
     excelBtn: true,
     printBtn: true,
-    viewBtn: true,
+    editBtn: false,
+    delBtn: false,
+    addBtn: false,
     column: [
         {
             label: '记录编号',
@@ -24,6 +26,8 @@ export const tableOption = {
 			width: 120,
 			align: 'left',
             display:false,
+            hide: true,
+            showColumn: false,
         },
         {
             label: '租户编号',
@@ -32,6 +36,8 @@ export const tableOption = {
 			search: true,
 			width: 120,
             display:false,
+            hide: true,
+            showColumn: false,
         },
         {
             label: '公司名称',
@@ -67,6 +73,7 @@ export const tableOption = {
         },
         {
             label: '企业类型',
+            width: 120,
             prop: 'type',
             sortable: true,
             display:false,
@@ -95,6 +102,7 @@ export const tableOption = {
         },
         {
             label: '企业注册代码',
+            width: 120,
             prop: 'registerCode',
             sortable: true,
 			search: true,
@@ -102,6 +110,7 @@ export const tableOption = {
         },
         {
             label: '区域代码',
+            width: 100,
             prop: 'areaCode',
             sortable: true,
 			search: true,
@@ -109,6 +118,7 @@ export const tableOption = {
         },
         {
             label: '行政区号',
+            width: 100,
             prop: 'regionCode',
             sortable: true,
 			search: true,
@@ -116,6 +126,7 @@ export const tableOption = {
         },
         {
             label: '地址-省',
+            width: 100,
             prop: 'province',
             type: 'select',
             sortable: true,
@@ -129,6 +140,7 @@ export const tableOption = {
         },
         {
             label: '地址-市',
+            width: 100,
             prop: 'city',
             type: 'select',
             sortable: true,
@@ -142,6 +154,7 @@ export const tableOption = {
         },
         {
             label: '地址-区',
+            width: 100,
             prop: 'district',
             type: 'select',
             sortable: true,
@@ -155,12 +168,14 @@ export const tableOption = {
         },
         {
             label: '地址',
+            width: 80,
             prop: 'address',
             sortable: true,
             display:false,
         },
         {
             label: '记录状态',
+            width: 100,
             prop: 'rstate',
             display:false,
             sortable: true,
@@ -177,6 +192,7 @@ export const tableOption = {
         },
         {
             label: '创建时间',
+            width: 100,
             prop: 'createTime',
             type: "date",  
             format: "yyyy-MM-dd hh:mm:ss",
@@ -186,6 +202,7 @@ export const tableOption = {
         },
         {
             label: '修改时间',
+            width: 100,
             prop: 'updateTime',
             type: "date",  
             format: "yyyy-MM-dd hh:mm:ss",
@@ -403,7 +420,8 @@ export const tableOption = {
             span:24,
             hide:true,
             formslot:true,
-            }]
+            }],
+        display: false,    
     },
     {
         icon:'el-icon-info',
@@ -416,19 +434,21 @@ export const tableOption = {
             span:24,
             hide:true,
             formslot:true,
-            }]
+            }],
+        display: false,    
     },
-    {
-        icon:'el-icon-info',
-        label: '公司关系',
-        prop: 'group4',
-        column:[{
-            labelWidth:0,
-            label: '',
-            prop: 'companyRelation',
-            span:24,
-            hide:true,
-            formslot:true,
-            }]
-    },]
+    // {
+    //     icon:'el-icon-info',
+    //     label: '公司关系',
+    //     prop: 'group4',
+    //     column:[{
+    //         labelWidth:0,
+    //         label: '',
+    //         prop: 'companyRelation',
+    //         span:24,
+    //         hide:true,
+    //         formslot:true,
+    //         }]
+    // }
+    ]
 }
