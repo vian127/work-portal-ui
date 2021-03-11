@@ -38,7 +38,7 @@ export function delObj(id) {
 export function putObj(obj) {
     return request({
         url: '/orgc/orgversion/edit',
-        method: 'post',
+        method: 'put',
         data: obj
     })
 }
@@ -56,22 +56,46 @@ export function addTree(obj) {
     return request({
         url: '/orgc/departmentnode/add',
         method: 'post',
-       
-        params: obj,
+        data: obj,
     })
 }
 // 编辑组织结构节点
 export function editTree(obj) {
     return request({
-        url: '/departmentnode/edit',
-        method: 'post',
-        params: obj
+        url: '/orgc/departmentnode/edit',
+        method: 'put',
+        data: obj,
     })
 }
 // 组织结构节点失效
 export function deleteTree(id) {
     return request({
-        url: '/departmentnode/'+ id,
+        url: '/orgc/departmentnode/'+ id,
         method: 'delete'
     })
 }
+// 发布
+export function publishOrg(obj) {
+    return request({
+        url: '/orgc/orgversion/publish',
+        method: 'post',
+        data: obj
+    })
+}
+/**组织名称唯一性校验 */
+export function orgNameUniq(query) {
+    return request({
+        url: '/orgc/orginfo/list',
+        method: 'get',
+        params: query
+    })
+}
+/**部门名称唯一性校验 */
+export function deptNameUniq(obj) {
+    return request({
+        url: '/orgc/departmentnode/validNameOrCode',
+        method: 'post',
+        data: obj
+    })
+}
+

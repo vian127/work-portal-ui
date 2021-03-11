@@ -2,6 +2,7 @@
     <avue-crud ref="crud"
         :option="option" 
         :page="page"
+        :table-loading="tableLoading"
         :data="data"
         >
         <template slot="selectId" slot-scope="scope">
@@ -9,17 +10,17 @@
         </template>
     </avue-crud>
 </template>
-
 <script>
-    import {getPage} from '@/api/orgc/companyinfo'
+    import {getOrg} from '@/api/orgc/orgtenant'
     /**
      * 关联公司
      */
     export default {
-        name: "relevanceOrg",
+            name: "relevanceOrg",
             data(){
                 return {
                     data:[],
+                    tableLoading: false,
                     option:{
                         addBtn:false,
                         editBtn:false,
@@ -61,6 +62,14 @@
                                 addDisplay: true,
                                 editDisplay: true,
                                 viewDisplay: true,
+                                dicData: [
+                                    {
+                                        label: '已生效',
+                                        value: "1"
+                                    },{
+                                        label: '已失效',
+                                        value: "0"
+                                    }]
                             },
                             {
                                 label: '创建时间',
@@ -93,10 +102,12 @@
                     },
                     companyList:[],
                     selectData: null,
-            }
+                }
+               
         },
+        props: ['relevanceOrgIds'],
         created() {
-            this.getPage(this.page,);
+            this.getPage(this.page);
         },
         mounted: function () {
         },
@@ -105,19 +116,26 @@
              * 获取列表(分页)数据
              */
             getPage(page) {
+                this.tableLoading = true;
                 let that = this;
-                getPage(Object.assign({
+                getOrg(Object.assign({
                     current: page.currentPage,
                     size: page.pageSize,
                     descs: this.page.descs,
                     ascs: this.page.ascs,
                 })).then(response => {
                     that.data = response.data.data.records;
+                    let result = that.data.filter(item=>{
+                        return item.id == this.relevanceOrgIds;
+                    })
+                    setTimeout(()=>{
+                        this.selectData = result[0];
+                    },0)
+                    this.tableLoading = false;
                 }).catch(() => {
                     this.tableLoading = false
                 })
             },
-           
         }
     };
 </script>

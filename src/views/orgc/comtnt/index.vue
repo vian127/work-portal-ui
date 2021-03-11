@@ -22,16 +22,22 @@
                 @row-update="handleUpdate"
                 @row-del="handleDel"
 			>
-            <template slot-scope="scope" slot="menu">
-                <el-button size="small"  type="text" @click="handleRelevance(scope.row)"> 关联公司</el-button>
-            </template>
+                <template slot-scope="scope" slot="menu">
+                    <el-button size="small"  type="text" @click="handleRelevance(scope.row)"> 关联公司</el-button>
+                </template>
+                <template slot-scope="scope" slot="name">
+                    <span>{{scope.row.tenantInfoDto.name}}</span>
+                </template>
+                <template slot-scope="scope" slot="alias">
+                    <span>{{scope.row.tenantInfoDto.alias}}</span>
+                </template>
             </avue-crud>
         </basic-container>
         <el-dialog title="关联公司"
                :visible.sync="dialogVisible"
                width="80%"
             >
-            <relevanceCompany ref="relevanceCompany"></relevanceCompany>
+            <relevanceCompany ref="relevanceCompany" :relevanceComIds="relevanceComIds" v-if="dialogVisible"></relevanceCompany>
             <span slot="footer" class="dialog-footer">
                 <el-button size="small" @click="dialogVisible = false">取 消</el-button>
                 <el-button size="small" type="primary" @click="selectCompany()">确 定</el-button>
@@ -42,7 +48,7 @@
 
 <script>
     import {mapGetters} from 'vuex'
-    import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/companttenant'
+    import {getPage, getObj, addObj, putObj, delObj, addCompanttenant} from '@/api/orgc/companttenant'
     import {tableOption} from './companttenant'
     import relevanceCompany from '../../../components/orgc/relevance-company/relevance-company'
     export default {
@@ -53,26 +59,17 @@
         data() {
             return {
                 form: {},
-                tableData: [
-                    {
-                        id: 1,
-                        companyId: 2,
-                        seq: 2,
-                        rstate: '已生效'
-
-                    }
-                ],
+                tableData: [],
                 tableOption: tableOption,
 				page: {
-                    total: 0, // 总页数
-                    currentPage: 1, // 当前页数
-                    pageSize: 20, // 每页显示多少条
                     ascs: [],//升序字段
                     descs: []//降序字段
                 },
                 paramsSearch: {},
                 tableLoading: false,
-                dialogVisible: false
+                dialogVisible: false,
+                companttenantData: {},
+                relevanceComIds: [],
             }
         },
 		
@@ -98,15 +95,10 @@
             getPage(page, params) {
                 this.tableLoading = true
                 getPage(Object.assign({
-                    current: page.currentPage,
-                    size: page.pageSize,
                     descs: this.page.descs,
                     ascs: this.page.ascs,
                 }, params, this.paramsSearch)).then(response => {
-                    this.tableData = response.data.data.records
-                    this.page.total = response.data.data.total
-                    this.page.currentPage = page.currentPage
-                    this.page.pageSize = page.pageSize
+                    this.tableData = response.data.data;
                     this.tableLoading = false
                 }).catch(() => {
                     this.tableLoading = false
@@ -118,7 +110,6 @@
             searchChange(params,done) {
                 params = this.filterForm(params)
                 this.paramsSearch = params
-                this.page.currentPage = 1
                 this.getPage(this.page, params)
                 done()
             },
@@ -212,16 +203,28 @@
                 })
             },
             handleRelevance(row){
-                console.log(row);
+                this.companttenantData = row;
+                // 查询关联公司
+                getObj(row.tenantInfoDto.tenantId).then(res=>{
+                   this.relevanceComIds = res.data.data.map(item=>item.companyId);
+                });
                 this.dialogVisible = true;
             },
             /**
-             * 选择关联告警
+             * 选择关联公司
              */
             selectCompany(){
                 this.dialogVisible = false;
                 let data = this.$refs.relevanceCompany.selectData;
-                this.$message.success('选中的数据'+ JSON.stringify(data));
+                let params = data.map(item=>({
+                    tenantId: this.companttenantData.tenantInfoDto.tenantId,
+                    companyId: item.id,
+                    seq:'',
+                }));
+                addCompanttenant(params).then(response=>{
+                    this.$message.success('关联成功');
+                    this.getPage(this.page)
+                });
             }
         }
     }

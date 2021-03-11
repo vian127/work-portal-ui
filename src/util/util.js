@@ -343,3 +343,21 @@ export const vaildData = (val, dafult) => {
   }
   return !validatenull(val) ? val : dafult;
 };
+
+/**
+ * 生成id
+ */
+export const uid = () => {
+    var len = 36;
+    var uuid = [];
+    var str = '0123456789abcdef';
+    for (var i = 0; i < len; i++) {
+      uuid[i] = str.substr(Math.floor(Math.random() * 0x10), 1);
+    }
+    if (len === 36) {
+      uuid[14] = '4';
+      uuid[19] = str.substr((uuid[19] & 0x3 | 0x8), 1);
+      uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+    }
+    return uuid.join('').replace(/-/g, '');
+}

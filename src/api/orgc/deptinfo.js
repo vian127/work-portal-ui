@@ -37,7 +37,22 @@ export function delObj(id) {
 
 export function putObj(obj) {
     return request({
-        url: '/orgc/deptinfo',
+        url: '/orgc/deptinfo/edit',
+        method: 'put',
+        data: obj
+    })
+}
+
+export function getTree(query) {
+    return request({
+        url: '/orgc/departmentnode/tree',
+        method: 'get',
+        params: query
+    })
+}
+export function editNodeInfo(obj) {
+    return request({
+        url: '/orgc/departmentnode/edit',
         method: 'put',
         data: obj
     })

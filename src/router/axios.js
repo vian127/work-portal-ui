@@ -26,7 +26,7 @@ axios.defaults.withCredentials = true
 NProgress.configure({
   showSpinner: false
 })
-axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
+// axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8';
 
 
 // HTTPrequest拦截

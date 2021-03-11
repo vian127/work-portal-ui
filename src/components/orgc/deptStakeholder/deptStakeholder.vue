@@ -11,12 +11,12 @@
 
 <script>
 /**
- * 干系人
+ * 部门干系人
  */
 import { uid } from "@/util/util";
 export default {
-  name: "stakeholder",
-  props: ["companyId", "stakeholderData", "isShowView","stationData"],
+  name: "deptStakeholder",
+  props: ['deptStakeholderList','isEdit'],
   data() {
     return {
       data: [], // 展示数据
@@ -24,30 +24,15 @@ export default {
       option: {
         addBtn: false,
         editBtn: false,
-        addRowBtn: true,
+        addRowBtn: false,
         cellBtn: true,
         menuWidth: 150,
         columnBtn: false,
         refreshBtn: false,
         menu: true,
-        header: true,
+        header: false,
         saveBtnText: "确定",
         column: [
-          {
-            label: "驻点代码",
-            width: 120,
-            prop: "stationCode",
-            sortable: false,
-            hide: false,
-            showColumn: true,
-            cell: true,
-            type: 'select',
-            props: {
-              label: 'stationName',
-              value: 'id'
-            },
-            dicData: this.stationData,
-          },
           {
             label: "干系人类型",
             width: 120,
@@ -116,28 +101,57 @@ export default {
             hide: false,
             showColumn: true,
             cell: true,
+          },{
+            label: "备注",
+            width: 120,
+            prop: "remark",
+            sortable: false,
+            hide: false,
+            showColumn: true,
+            cell: true,
           }],
       },
     };
   },
   created() {
-    this.data = this.stakeholderData.map((item) => ({
-      ...item,
-      markId: uid(),
-    }));
-    this.resultData = this.data;
-    this.handleBtn();
+   
+  },
+  watch:{
+    /**控制部门干系人是否可新增 */
+    deptStakeholderList(){
+       this.data = this.deptStakeholderList.map((item) => ({
+        ...item,
+        markId: uid(),
+      }));
+      if(this.deptStakeholderList && this.deptStakeholderList.length >0){
+        this.option.addRowBtn = false;
+        this.option.header = false;
+      }else {
+        this.option.addRowBtn = true;
+        this.option.header = true;
+      }
+      this.resultData = this.data;
+    },
+    /**控制部门干系人是否可编辑 */
+    isEdit(cur){
+      if(cur){
+        this.option.menu = false;
+      }else{
+        this.option.menu = true;
+      }
+    }
   },
   mounted: function () {},
   methods: {
     addUpdate(form, index, done) {
-      form.companyId = this.companyId;
       form.markId = uid();
       let flag = this.resultData.find((item) => item.id == form.id);
       if (!flag) {
         this.resultData.push(form);
       }
-      this.$emit("getStakeholder", this.resultData);
+      this.$emit("getDeptStakeholder", this.resultData);
+      this.option.addRowBtn = false;
+      this.option.header = false;
       done();
     },
     rowDel(form, index) {
@@ -152,17 +166,7 @@ export default {
           item.rstate = "0";
         }
       });
-      this.$emit("getStakeholder", this.resultData);
-    },
-    /**
-     * 控制干系人列表操作按钮
-     */
-    handleBtn() {
-      if (this.isShowView) {
-        this.option.addRowBtn = false;
-        this.option.header = false;
-        this.option.menu = false;
-      }
+      this.$emit("getDeptStakeholder", this.resultData);
     },
   },
 };

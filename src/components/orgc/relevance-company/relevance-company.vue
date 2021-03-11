@@ -1,11 +1,14 @@
 <template>
-    <avue-crud ref="crud"
-        :option="option" 
-        :page="page"
-        :data="data"  
-        @selection-change="selectionChange"
-        >
-    </avue-crud>
+    <div>
+        <avue-crud ref="crud"
+            :option="option" 
+            :page="page"
+            :data="data"  
+            :table-loading="tableLoading"
+            @selection-change="selectionChange"
+            >
+        </avue-crud>
+    </div>
 </template>
 
 <script>
@@ -15,9 +18,10 @@
      */
     export default {
         name: "relevanceCompany",
-            data(){
+        data(){
                 return {
                     data:[],
+                    tableLoading: false,
                     option:{
                         addBtn:false,
                         editBtn:false,
@@ -48,6 +52,15 @@
                                 addDisplay: true,
                                 editDisplay: true,
                                 viewDisplay: true,
+                                type: 'select',
+                                dicData: [
+                                    {
+                                        label: '已生效',
+                                        value: "1"
+                                    },{
+                                        label: '已失效',
+                                        value: "0"
+                                    }]
                             },
                             {
                                 label: '创建时间',
@@ -82,8 +95,12 @@
                     selectData:[],
             }
         },
+        props: ['relevanceComIds'],
         created() {
-            this.getPage(this.page,);
+            this.getPage(this.page)
+        },
+        updated() {
+          
         },
         mounted: function () {
         },
@@ -92,6 +109,7 @@
              * 获取列表(分页)数据
              */
             getPage(page) {
+                this.tableLoading = true;
                 let that = this;
                 getPage(Object.assign({
                     current: page.currentPage,
@@ -99,9 +117,21 @@
                     descs: this.page.descs,
                     ascs: this.page.ascs,
                 })).then(response => {
+                    let selectData = [];
                     that.data = response.data.data.records;
+                    if(that.relevanceComIds && that.relevanceComIds.length > 0){
+                        that.data.forEach(item=>{
+                            if(that.relevanceComIds.includes(item.id)){
+                                selectData.push(item);
+                            }
+                        })
+                    }
+                   setTimeout(()=>{
+                        that.$refs.crud.toggleSelection(selectData);
+                    },0)
+                    this.tableLoading = false;
                 }).catch(() => {
-                    this.tableLoading = false
+                    this.tableLoading = false;
                 })
             },
             selectionChange(list){

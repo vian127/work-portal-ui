@@ -25,13 +25,19 @@
                 <template slot-scope="scope" slot="menu">
                     <el-button size="small"  type="text" @click="handleOrg(scope.row)"> 关联组织</el-button>
                 </template>
+                <template slot-scope="scope" slot="orgName">
+                    <span>{{scope.row.tenantInfoDto.name}}</span>
+                </template>
+                 <template slot-scope="scope" slot="orgAlias">
+                    <span>{{scope.row.tenantInfoDto.alias}}</span>
+                </template>
             </avue-crud>
         </basic-container>
         <el-dialog title="关联组织"
                :visible.sync="dialogVisible"
                width="80%"
             >
-            <relevanceOrg ref="relevanceOrg"></relevanceOrg>
+            <relevanceOrg ref="relevanceOrg" :relevanceOrgIds = "relevanceOrgIds" v-if="dialogVisible"></relevanceOrg>
             <span slot="footer" class="dialog-footer">
                 <el-button size="small" @click="dialogVisible = false">取 消</el-button>
                 <el-button size="small" type="primary" @click="handleSelect()">确 定</el-button>
@@ -42,7 +48,7 @@
 
 <script>
     import {mapGetters} from 'vuex'
-    import {getPage, getObj, addObj, putObj, delObj} from '@/api/orgc/orgtenant'
+    import {getPage, getObj, addObj, putObj, delObj, addOrg, queryOrg} from '@/api/orgc/orgtenant'
     import {tableOption} from './orgtenant'
     import relevanceOrg from '../../../components/orgc/relevance-org/relevance-org'
     export default {
@@ -53,22 +59,17 @@
         data() {
             return {
                 form: {},
-                tableData: [
-                    {
-                        orgId: '23'
-                    }
-                ],
+                tableData: [],
                 tableOption: tableOption,
 				page: {
-                    total: 0, // 总页数
-                    currentPage: 1, // 当前页数
-                    pageSize: 20, // 每页显示多少条
                     ascs: [],//升序字段
                     descs: []//降序字段
                 },
                 paramsSearch: {},
                 tableLoading: false,
                 dialogVisible: false,
+                orgTenantData:{},
+                relevanceOrgIds: '',
             }
         },
 		
@@ -94,18 +95,13 @@
             getPage(page, params) {
                 this.tableLoading = true
                 getPage(Object.assign({
-                    current: page.currentPage,
-                    size: page.pageSize,
                     descs: this.page.descs,
                     ascs: this.page.ascs,
                 }, params, this.paramsSearch)).then(response => {
-                    this.tableData = response.data.data.records
-                    this.page.total = response.data.data.total
-                    this.page.currentPage = page.currentPage
-                    this.page.pageSize = page.pageSize
-                    this.tableLoading = false
+                    this.tableData = response.data.data;
+                    this.tableLoading = false;
                 }).catch(() => {
-                    this.tableLoading = false
+                    this.tableLoading = false;
                 })
             },
             /**
@@ -114,7 +110,6 @@
             searchChange(params,done) {
                 params = this.filterForm(params)
                 this.paramsSearch = params
-                this.page.currentPage = 1
                 this.getPage(this.page, params)
                 done()
             },
@@ -208,16 +203,26 @@
                 })
             },
             handleOrg(row){
-                console.log(row)
+                this.orgTenantData = row;
+                getObj(row.tenantInfoDto.tenantId).then(res=>{
+                    this.relevanceOrgIds = res.data.data.length > 0 ? res.data.data[0].orgId : '';
+                }); 
                 this.dialogVisible = true;
             },
+            /**关联组织 */
             handleSelect(){
                 this.dialogVisible = false;
                 let data = this.$refs.relevanceOrg.selectData;
-                console.log(data);
-                this.$message.success('选中的数据'+ JSON.stringify(data));
-            }
-
+                let params = [{ 
+                    tenantId: this.orgTenantData.tenantInfoDto.tenantId,
+                    orgId: data.id,
+                    seq:'',
+                }];
+                addOrg(params).then(response=>{
+                    this.$message.success('关联成功');
+                    this.getPage(this.page);
+                });
+            },
         },
     }
 </script>

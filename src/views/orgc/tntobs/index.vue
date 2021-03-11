@@ -99,10 +99,10 @@
             ...mapGetters(['permissions']),
             permissionList() {
                 return {
-					addBtn: this.vaildData(this.permissions.orgc_obs_add, false),
-                    delBtn: this.vaildData(this.permissions.orgc_obs_del, false),
-                    editBtn: this.vaildData(this.permissions.orgc_obs_edit, false),
-                    viewBtn: this.vaildData(this.permissions.orgc_obs_get, false)
+					addBtn: this.vaildData(this.permissions.orgc_tntobs_add, false),
+                    delBtn: this.vaildData(this.permissions.oorgc_tntobs_del, false),
+                    editBtn: this.vaildData(this.permissions.orgc_tntobs_edit, false),
+                    viewBtn: this.vaildData(this.permissions.orgc_tntobs_get, false)
                 };
             }
         },
@@ -307,7 +307,6 @@
              */
             getStation(data){
                 this.station = data;
-                console.log(data);
             },
             /**
              * 获取公司关系数据

@@ -276,10 +276,10 @@
       getPage2(page, params) {
         this.tableLoading2 = true
         getPage2(Object.assign({
-          current: page.currentPage,
-          size: page.pageSize,
-          descs: this.page2.descs,
-          ascs: this.page2.ascs,
+          current: 1,
+          size: 2,
+          descs: 4,
+          ascs: 5,
         }, params, this.paramsSearch2,{
           appId: this.clickObj.id
         })).then(response => {

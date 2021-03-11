@@ -42,6 +42,7 @@
                             <el-button size="small" type="primary" v-if="isEdit" @click="handleEdit">编辑</el-button>
                         </div>
                     </el-card>
+                    
                 </el-col>
             </el-row>
         </basic-container>
@@ -68,6 +69,7 @@
                 treeLoading:false,
                 treeData:[],
                 isEdit: false,
+                tenantId: '',
                 treeOption:{
                     title:'新增组织结构',
                     filterText:"搜索关键字自定义",
@@ -275,7 +277,8 @@
         },
 		
         created() {
-           
+            /**通过tenantId来控制部门信息是否可编辑 */
+            this.tenantId = this.userInfo.tenantId;
         },
         mounted: function () {
             setTimeout(()=>{
@@ -283,30 +286,36 @@
             },2000)
         },
         computed: {
-            ...mapGetters(['permissions']),
+            ...mapGetters(['permissions','userInfo']),
             permissionList() {
                 return {
-					addBtn: this.vaildData(this.permissions.orgc_deptinfo_add, false),
-                    delBtn: this.vaildData(this.permissions.orgc_deptinfo_del, false),
-                    editBtn: this.vaildData(this.permissions.orgc_deptinfo_edit, false),
-                    viewBtn: this.vaildData(this.permissions.orgc_deptinfo_get, false)
+					addBtn: this.vaildData(this.permissions.orgc_tntebs_add, false),
+                    delBtn: this.vaildData(this.permissions.orgc_tntebs_del, false),
+                    editBtn: this.vaildData(this.permissions.orgc_tntebs_edit, false),
+                    viewBtn: this.vaildData(this.permissions.orgc_tntebs_get, false)
                 };
             }
         },
         methods: {
             nodeClick(data){
                 this.deptLoading = true;
-                /**部门信息 */
-                getObj(data.nodeInfo.deptId).then(res=>{
-                    this.formData = res.data.data.deptInfo;
-                    this.deptStakeholderList = res.data.data.deptStakeholderList;
-                });
                 /** 节点信息 */
                 this.nodeData = data;
-                this.formOption.detail = false;
-                this.isEdit = false;
+                /**通过tenantId来控制部门信息是否可查看和编辑 */
+                console.log(data.nodeInfo.tenantId,this.tenantId);
+                if(data.nodeInfo.tenantId === this.tenantId){
+                    /**部门信息 */
+                    getObj(data.nodeInfo.deptId).then(res=>{
+                        this.formData = res.data.data.deptInfo;
+                        this.deptStakeholderList = res.data.data.deptStakeholderList;
+                    });
+                    this.formOption.detail = true;
+                    this.isEdit = true; 
+                } else {
+                    this.$message.warning('该租户没有查看此权限');
+                }
             },
-            /**
+             /**
              * 获取部门干系人
              */
             getDeptStakeholder(data){
@@ -323,7 +332,7 @@
                     deptInfo: this.formData,
                     deptStakeholderList: this.deptStakeholderData,
                 }
-                putObj(data).then(res=>{
+                putObj(this.formData).then(res=>{
                     this.$message.success('编辑成功');
                 });
                 let nodeData = this.nodeData;
@@ -346,7 +355,6 @@
                         level: nodeData.nodeInfo.level,
                         seq: nodeData.nodeInfo.seq,
                         id: nodeData.nodeInfo.id,
-                        relTenantId: deptData.relTenantId,
                     },
                     children: nodeData.children,
                 }

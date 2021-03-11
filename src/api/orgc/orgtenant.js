@@ -7,7 +7,7 @@ import request from '@/router/axios'
 
 export function getPage(query) {
     return request({
-        url: '/orgc/orgtenant/page',
+        url: '/orgc/orgtenant/list',
         method: 'get',
         params: query
     })
@@ -39,6 +39,22 @@ export function putObj(obj) {
     return request({
         url: '/orgc/orgtenant',
         method: 'put',
+        data: obj
+    })
+}
+/**组织列表 */
+export function getOrg(query) {
+    return request({
+        url: '/orgc/orginfo/page',
+        method: 'get',
+        params: query
+    })
+}
+/**新增关联组织 */
+export function addOrg(obj) {
+    return request({
+        url: '/orgc/orgtenant/add',
+        method: 'post',
         data: obj
     })
 }

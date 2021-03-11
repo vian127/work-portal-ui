@@ -7,7 +7,7 @@ import request from '@/router/axios'
 
 export function getPage(query) {
     return request({
-        url: '/orgc/companttenant/page',
+        url: '/orgc/companttenant/list',
         method: 'get',
         params: query
     })
@@ -39,6 +39,14 @@ export function putObj(obj) {
     return request({
         url: '/orgc/companttenant',
         method: 'put',
+        data: obj
+    })
+}
+/**新增关联公司 */
+export function addCompanttenant(obj) {
+    return request({
+        url: '/orgc/companttenant/add',
+        method: 'post',
         data: obj
     })
 }

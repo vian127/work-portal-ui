@@ -14,6 +14,9 @@ export const tableOption = {
     searchShow: false,
     excelBtn: true,
     printBtn: true,
+    addBtn: false,
+    editBtn: false,
+    delBtn: false,
     column: [
     {
             label: '记录编号',
@@ -39,7 +42,8 @@ export const tableOption = {
             prop: 'orgId',
             sortable: true,
             hide: false,
-            showColumn: true,
+            showColumn: false,
+            display: false,
         },
         {
             label: '记录状态',
@@ -47,7 +51,8 @@ export const tableOption = {
             prop: 'rstate',
             sortable: true,
             hide: false,
-            showColumn: true,
+            showColumn: false,
+            display: false,
             type: 'select',
             dicData: [
                 {
@@ -64,7 +69,8 @@ export const tableOption = {
             prop: 'createTime',
             sortable: true,
             hide: false,
-            showColumn: true,
+            showColumn: false,
+            display: false,
             type: "date",  
             format: "yyyy-MM-dd hh:mm:ss",
             valueFormat: "yyyy-MM-dd hh:mm:ss",
@@ -75,10 +81,35 @@ export const tableOption = {
             prop: 'updateTime',
             sortable: true,
             hide: false,
-            showColumn: true,
+            showColumn: false,
+            display: false,
             type: "date",  
             format: "yyyy-MM-dd hh:mm:ss",
             valueFormat: "yyyy-MM-dd hh:mm:ss",
+        },
+        {
+            label: '公司名称',
+            prop: 'orgName',
+            sortable: true,
+            hide: false,
+            showColumn: true,
+            slot: true,
+        },
+        {
+            label: '公司简称',
+            prop: 'orgAlias',
+            sortable: false,
+            hide: false,
+            showColumn: true,
+            slot: true,
+        },
+        {
+            label: '关联组织个数',
+            labelWidth: 120,
+            prop: 'orgNum',
+            sortable: false,
+            hide: false,
+            showColumn: true,
         },
         ]
 }

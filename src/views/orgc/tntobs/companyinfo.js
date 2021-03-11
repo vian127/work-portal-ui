@@ -214,7 +214,7 @@ export const tableOption = {
         icon:'el-icon-info',
         label: '基本信息',
         prop: 'group1',
-        column:[{
+        column:[  {
             label: '记录编号',
             prop: 'id',
             sortable: false,
